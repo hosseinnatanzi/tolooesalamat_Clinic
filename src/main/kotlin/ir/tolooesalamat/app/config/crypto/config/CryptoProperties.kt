@@ -1,5 +1,4 @@
-package ir.tolooesalamat.app.config.crypto.config
-
+package ir.tolooesalamat.app.crypto.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component

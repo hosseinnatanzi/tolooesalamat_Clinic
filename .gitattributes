@@ -1,2 +1,27 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
+# ═══════════════════════════════════════════
+# 🔐 Crypto Keys - NEVER COMMIT
+# ═══════════════════════════════════════════
+src/main/resources/keys/*.pem
+src/main/resources/keys/*.key
+src/main/resources/keys/*.p12
+src/main/resources/keys/*.jks
+*.pem
+*.key
+*.p12
+*.jks
+
+# ═══════════════════════════════════════════
+# Environment
+# ═══════════════════════════════════════════
+.env
+.env.*
+!.env.example
+
+# ═══════════════════════════════════════════
+# Build & IDE
+# ═══════════════════════════════════════════
+target/
+build/
+.idea/
+*.iml
+.vscode/

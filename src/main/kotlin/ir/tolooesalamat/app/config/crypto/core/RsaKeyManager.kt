@@ -1,6 +1,6 @@
-package ir.tolooesalamat.app.config.crypto.core
+package ir.tolooesalamat.app.crypto.core
 
-import ir.tolooesalamat.app.config.crypto.config.CryptoProperties
+import ir.tolooesalamat.app.crypto.config.CryptoProperties
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ResourceLoader
@@ -15,12 +15,18 @@ import javax.crypto.EncryptedPrivateKeyInfo
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
+/**
+ * مدیر جفت کلید RSA.
+ * کلیدها یک بار در startup بارگذاری می‌شوند و در حافظه می‌مانند.
+ */
 @Component
 class RsaKeyManager(
     private val properties: CryptoProperties,
     private val resourceLoader: ResourceLoader
 ) {
+
     private val log = LoggerFactory.getLogger(javaClass)
+
     private lateinit var publicKey: PublicKey
     private lateinit var privateKey: PrivateKey
 
@@ -29,37 +35,63 @@ class RsaKeyManager(
         log.info("🔐 بارگذاری کلیدهای RSA...")
         publicKey = loadPublicKey()
         privateKey = loadPrivateKey()
-        log.info("✅ کلیدهای RSA آماده هستند")
+        log.info("✅ کلیدهای RSA با موفقیت بارگذاری شدند")
     }
 
+    /**
+     * بارگذاری Public Key از classpath.
+     */
     private fun loadPublicKey(): PublicKey {
         val resource = resourceLoader.getResource(properties.publicKeyPath)
-        require(resource.exists()) { "Public Key یافت نشد: ${properties.publicKeyPath}" }
+
+        require(resource.exists()) {
+            "❌ Public Key یافت نشد: ${properties.publicKeyPath}"
+        }
+
         val pem = resource.inputStream.bufferedReader().use { it.readText() }
         val base64 = pem
             .replace("-----BEGIN PUBLIC KEY-----", "")
             .replace("-----END PUBLIC KEY-----", "")
             .replace("\\s".toRegex(), "")
-        val spec = X509EncodedKeySpec(Base64.getDecoder().decode(base64))
+
+        val keyBytes = Base64.getDecoder().decode(base64)
+        val spec = X509EncodedKeySpec(keyBytes)
+
         return KeyFactory.getInstance("RSA").generatePublic(spec)
     }
 
+    /**
+     * بارگذاری Private Key رمزنگاری‌شده از classpath.
+     */
     private fun loadPrivateKey(): PrivateKey {
         val resource = resourceLoader.getResource(properties.privateKeyPath)
-        require(resource.exists()) { "Private Key یافت نشد: ${properties.privateKeyPath}" }
+
+        require(resource.exists()) {
+            "❌ Private Key یافت نشد: ${properties.privateKeyPath}"
+        }
+
+        require(properties.privateKeyPassword.isNotBlank()) {
+            "❌ رمز Private Key تنظیم نشده است"
+        }
+
         val pem = resource.inputStream.bufferedReader().use { it.readText() }
         val base64 = pem
             .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
             .replace("-----END ENCRYPTED PRIVATE KEY-----", "")
             .replace("\\s".toRegex(), "")
+
         val encryptedBytes = Base64.getDecoder().decode(base64)
         val encryptedInfo = EncryptedPrivateKeyInfo(encryptedBytes)
+
         val pbeSpec = PBEKeySpec(properties.privateKeyPassword.toCharArray())
         val secretFactory = SecretKeyFactory.getInstance(encryptedInfo.algName)
         val secretKey = secretFactory.generateSecret(pbeSpec)
+
         val keySpec = encryptedInfo.getKeySpec(secretKey)
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec)
     }
+
+    // ═══════════ API عمومی ═══════════
 
     fun getPublicKey(): PublicKey = publicKey
     fun getPrivateKey(): PrivateKey = privateKey
