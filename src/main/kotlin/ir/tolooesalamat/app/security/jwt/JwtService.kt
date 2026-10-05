@@ -4,8 +4,8 @@ package ir.tolooesalamat.app.security.jwt
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
-import ir.tolooesalamat.app.config.crypto.core.RsaKeyManager
-import org.slf4j.LoggerFactory
+ import ir.tolooesalamat.app.crypto.core.RsaKeyManager
+ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit

@@ -2,7 +2,7 @@ package ir.tolooesalamat.app.config.crypto.converter
 
 
 
-import ir.tolooesalamat.app.config.crypto.core.HybridEncryptor
+import ir.tolooesalamat.app.crypto.core.HybridEncryptor
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
 import org.springframework.stereotype.Component
