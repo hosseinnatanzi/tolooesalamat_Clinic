@@ -53,7 +53,7 @@ class UserMapper {
      * DTO → Entity جدید.
      * نیاز به رمز هش‌شده دارد.
      */
-    fun toEntity(dto: UserDto, encodedPassword: String): User = User(
+    fun toEntity(dto: UserDto, encodedPassword: String?): User = User(
         phone = dto.phone,
         landline = dto.landline,
         password = encodedPassword,

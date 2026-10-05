@@ -81,6 +81,33 @@ class User(
     var testResults: MutableList<TestResult> = mutableListOf()
 
 ) : BaseEntity() {
+    constructor(
+        phone: String,
+        landline: String?,
+        password: String?,
+        firstName: String,
+        lastName: String,
+        age: Int?,
+        gender: Gender,
+        username: String,
+        role: Role,
+        enabled: Boolean
+    ) : this()
+
+    constructor(
+        phone: String,
+        landline: String?,
+        password: String?,
+        firstName: String,
+        lastName: String,
+        age: Int?,
+        gender: Gender,
+        username: String,
+        email: String?,
+        nationalId: String?,
+        role: Role,
+        enabled: Boolean
+    ) : this()
 
     @get:Transient
     val fullName: String
