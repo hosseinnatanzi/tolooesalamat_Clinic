@@ -1,0 +1,61 @@
+package ir.tolooesalamat.app.mapper
+
+import ir.tolooesalamat.app.domain.TestResult
+import ir.tolooesalamat.app.dto.TestResultDto
+import ir.tolooesalamat.app.dto.TestResultSummaryDto
+import org.springframework.stereotype.Component
+
+@Component
+class TestResultMapper {
+
+    fun toDto(result: TestResult): TestResultDto = TestResultDto(
+        id = result.id,
+        patientId = result.patient.id,
+        testId = result.test.id,
+        doctorId = result.doctor.id,
+        testDate = result.testDate,
+        // 🔓 رمزگشایی خودکار از طریق Converter
+        rawScore = result.rawScore,
+        interpretation = result.interpretation,
+        diagnosis = result.diagnosis,
+        rawData = result.rawData,
+        recommendations = result.recommendations,
+        doctorSignature = result.doctorSignature,
+        confidentialityLevel = result.confidentialityLevel,
+        patientName = result.patient.fullName,
+        patientFileNumber = result.patient.patientProfile?.fileNumber,
+        doctorName = result.doctor.fullName,
+        testName = result.test.name,
+        testCode = result.test.code,
+        isFinalized = result.isFinalized,
+        createdAt = result.createdAt
+    )
+
+    fun toSummary(result: TestResult): TestResultSummaryDto = TestResultSummaryDto(
+        id = result.id ?: 0L,
+        testName = result.test.name,
+        testCode = result.test.code,
+        testDate = result.testDate,
+        doctorName = result.doctor.fullName,
+        confidentialityLevel = result.confidentialityLevel,
+        isFinalized = result.isFinalized
+    )
+
+    fun toEntity(
+        dto: TestResultDto,
+        patient: ir.tolooesalamat.app.domain.User,
+        doctor: ir.tolooesalamat.app.domain.User,
+        test: ir.tolooesalamat.app.domain.PsychologicalTest
+    ): TestResult = TestResult(
+        patient = patient,
+        doctor = doctor,
+        test = test,
+        testDate = dto.testDate ?: java.time.LocalDateTime.now(),
+        rawScore = dto.rawScore,
+        interpretation = dto.interpretation,
+        diagnosis = dto.diagnosis,
+        rawData = dto.rawData,
+        recommendations = dto.recommendations,
+        confidentialityLevel = dto.confidentialityLevel
+    )
+}
