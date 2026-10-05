@@ -1,0 +1,20 @@
+target/
+build/
+*.class
+*.jar
+.idea/
+*.iml
+.vscode/
+src/main/resources/keys/*.pem
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+logs/
+*.log
+.DS_Store
+# Encryption keys
+src/main/resources/keys/*.xml
+src/main/resources/keys/*.pem
+src/main/resources/keys/*.key
