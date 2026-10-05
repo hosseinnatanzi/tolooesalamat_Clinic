@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import javax.crypto.Cipher
@@ -15,10 +16,6 @@ import javax.crypto.EncryptedPrivateKeyInfo
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-/**
- * مدیر جفت کلید RSA.
- * کلیدها یک بار در startup بارگذاری می‌شوند و در حافظه می‌مانند.
- */
 @Component
 class RsaKeyManager(
     private val properties: CryptoProperties,
@@ -26,7 +23,6 @@ class RsaKeyManager(
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
-
     private lateinit var publicKey: PublicKey
     private lateinit var privateKey: PrivateKey
 
@@ -38,15 +34,9 @@ class RsaKeyManager(
         log.info("✅ کلیدهای RSA با موفقیت بارگذاری شدند")
     }
 
-    /**
-     * بارگذاری Public Key از classpath.
-     */
     private fun loadPublicKey(): PublicKey {
         val resource = resourceLoader.getResource(properties.publicKeyPath)
-
-        require(resource.exists()) {
-            "❌ Public Key یافت نشد: ${properties.publicKeyPath}"
-        }
+        require(resource.exists()) { "Public Key یافت نشد: ${properties.publicKeyPath}" }
 
         val pem = resource.inputStream.bufferedReader().use { it.readText() }
         val base64 = pem
@@ -54,24 +44,16 @@ class RsaKeyManager(
             .replace("-----END PUBLIC KEY-----", "")
             .replace("\\s".toRegex(), "")
 
-        val keyBytes = Base64.getDecoder().decode(base64)
-        val spec = X509EncodedKeySpec(keyBytes)
-
+        val spec = X509EncodedKeySpec(Base64.getDecoder().decode(base64))
         return KeyFactory.getInstance("RSA").generatePublic(spec)
     }
 
-    /**
-     * بارگذاری Private Key رمزنگاری‌شده از classpath.
-     */
     private fun loadPrivateKey(): PrivateKey {
         val resource = resourceLoader.getResource(properties.privateKeyPath)
-
-        require(resource.exists()) {
-            "❌ Private Key یافت نشد: ${properties.privateKeyPath}"
-        }
+        require(resource.exists()) { "Private Key یافت نشد: ${properties.privateKeyPath}" }
 
         require(properties.privateKeyPassword.isNotBlank()) {
-            "❌ رمز Private Key تنظیم نشده است"
+            "رمز Private Key تنظیم نشده است"
         }
 
         val pem = resource.inputStream.bufferedReader().use { it.readText() }
@@ -91,7 +73,9 @@ class RsaKeyManager(
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec)
     }
 
-    // ═══════════ API عمومی ═══════════
+    // ═══════════════════════════════════════════
+    // 🔓 API عمومی
+    // ═══════════════════════════════════════════
 
     fun getPublicKey(): PublicKey = publicKey
     fun getPrivateKey(): PrivateKey = privateKey
@@ -107,13 +91,13 @@ class RsaKeyManager(
         }.doFinal(encrypted)
 
     fun sign(data: ByteArray): ByteArray =
-        java.security.Signature.getInstance(properties.signatureAlgorithm).apply {
+        Signature.getInstance(properties.signatureAlgorithm).apply {
             initSign(privateKey)
             update(data)
         }.sign()
 
     fun verify(data: ByteArray, signature: ByteArray): Boolean =
-        java.security.Signature.getInstance(properties.signatureAlgorithm).apply {
+        Signature.getInstance(properties.signatureAlgorithm).apply {
             initVerify(publicKey)
             update(data)
         }.verify(signature)

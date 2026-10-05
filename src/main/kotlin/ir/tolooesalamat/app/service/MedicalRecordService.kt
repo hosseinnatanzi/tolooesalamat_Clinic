@@ -9,17 +9,19 @@ import ir.tolooesalamat.app.dto.MedicalRecordSearchRequest
 import ir.tolooesalamat.app.dto.MedicalRecordSummaryDto
 import ir.tolooesalamat.app.dto.PagedResponse
 import ir.tolooesalamat.app.exception.AccessDeniedException
+import ir.tolooesalamat.app.exception.BusinessException
 import ir.tolooesalamat.app.exception.ResourceNotFoundException
 import ir.tolooesalamat.app.mapper.MedicalRecordMapper
 import ir.tolooesalamat.app.repository.MedicalRecordRepository
 import ir.tolooesalamat.app.repository.UserRepository
- import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 @Transactional(readOnly = true)
@@ -34,10 +36,15 @@ class MedicalRecordService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     // ═══════════════════════════════════════════
-    // 📋 لیست
+    // 📋 لیست و جستجو
     // ═══════════════════════════════════════════
 
-    fun search(request: MedicalRecordSearchRequest, currentUser: User): PagedResponse<MedicalRecordSummaryDto> {
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'RECEPTIONIST')")
+    fun search(
+        request: MedicalRecordSearchRequest,
+        currentUser: User
+    ): PagedResponse<MedicalRecordSummaryDto> {
+
         val pageable = PageRequest.of(
             request.page.coerceAtLeast(0),
             request.size.coerceIn(1, 100),
@@ -65,7 +72,14 @@ class MedicalRecordService(
         )
     }
 
-    fun getPatientHistory(patientId: Long, currentUser: User): List<MedicalRecordSummaryDto> {
+    /**
+     * سابقه پزشکی یک بیمار — برای بررسی طول درمان.
+     */
+    fun getPatientHistory(
+        patientId: Long,
+        currentUser: User
+    ): List<MedicalRecordSummaryDto> {
+
         val patient = userRepository.findById(patientId)
             .orElseThrow { ResourceNotFoundException.of("بیمار", patientId) }
 
@@ -76,6 +90,14 @@ class MedicalRecordService(
         }
 
         if (!hasAccess) {
+            accessLogService.logAccess(
+                user = currentUser,
+                resourceType = "PATIENT_HISTORY",
+                resourceId = patientId,
+                action = "VIEW",
+                success = false,
+                details = "دسترسی غیرمجاز"
+            )
             throw AccessDeniedException("شما به سابقه این بیمار دسترسی ندارید")
         }
 
@@ -83,10 +105,13 @@ class MedicalRecordService(
             user = currentUser,
             resourceType = "PATIENT_HISTORY",
             resourceId = patientId,
-            action = "VIEW"
+            action = "VIEW",
+            success = true,
+            details = "بررسی طول درمان"
         )
 
-        return medicalRecordRepository.findAllByPatientOrderBySessionDateDesc(patient)
+        return medicalRecordRepository
+            .findAllByPatientOrderBySessionDateDesc(patient)
             .map { medicalRecordMapper.toSummary(it) }
     }
 
@@ -119,10 +144,12 @@ class MedicalRecordService(
             .orElseThrow { ResourceNotFoundException.of("بیمار", dto.patientId) }
 
         if (patient.role != Role.PATIENT) {
-            throw ir.tolooesalamat.app.exception.BusinessException("کاربر انتخابی بیمار نیست")
+            throw BusinessException("کاربر انتخابی بیمار نیست")
         }
 
-        val sessionNumber = medicalRecordRepository.getMaxSessionNumber(patient.id!!) + 1
+        // شماره جلسه خودکار
+        val sessionNumber = medicalRecordRepository
+            .getMaxSessionNumber(patient.id!!) + 1
 
         val record = MedicalRecord(
             patient = patient,
@@ -152,7 +179,53 @@ class MedicalRecordService(
     }
 
     // ═══════════════════════════════════════════
-    // 🔏 امضای دیجیتال
+    // ✏️ به‌روزرسانی پرونده
+    // ═══════════════════════════════════════════
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
+    fun update(id: Long, dto: MedicalRecordDto, currentUser: User): MedicalRecordDto {
+
+        // 1. پیدا کردن پرونده با بررسی دسترسی
+        val record = findWithPermission(id, currentUser)
+
+        // 2. اگر نهایی شده، قابل ویرایش نیست (به جز ادمین)
+        if (record.isFinalized && currentUser.role != Role.ADMIN) {
+            throw BusinessException("پرونده تأیید‌شده قابل ویرایش نیست")
+        }
+
+        // 3. پزشک فقط پرونده خودش
+        if (currentUser.role == Role.DOCTOR && record.doctor.id != currentUser.id) {
+            throw AccessDeniedException("شما به این پرونده دسترسی ندارید")
+        }
+
+        // 4. به‌روزرسانی فیلدها
+        record.chiefComplaint = dto.chiefComplaint
+        record.presentIllness = dto.presentIllness
+        record.mentalStatusExam = dto.mentalStatusExam
+        record.diagnosis = dto.diagnosis
+        record.treatmentPlan = dto.treatmentPlan
+        record.medications = dto.medications
+        record.sessionNotes = dto.sessionNotes
+
+        // 5. ذخیره
+        val saved = medicalRecordRepository.save(record)
+
+        // 6. ثبت لاگ
+        accessLogService.logAccess(
+            user = currentUser,
+            resourceType = "MEDICAL_RECORD",
+            resourceId = id,
+            action = "UPDATE",
+            details = "به‌روزرسانی پرونده جلسه ${record.sessionNumber}"
+        )
+
+        log.info("✅ پرونده به‌روزرسانی شد: id=$id by ${currentUser.phone}")
+        return medicalRecordMapper.toDto(saved)
+    }
+
+    // ═══════════════════════════════════════════
+    // 🔏 تأیید نهایی با امضای دیجیتال
     // ═══════════════════════════════════════════
 
     @Transactional
@@ -160,14 +233,20 @@ class MedicalRecordService(
     fun finalizeRecord(id: Long, currentUser: User): MedicalRecordDto {
         val record = findWithPermission(id, currentUser)
 
+        // فقط پزشک معالج یا ادمین
         if (record.doctor.id != currentUser.id && currentUser.role != Role.ADMIN) {
             throw AccessDeniedException("فقط پزشک معالج می‌تواند تأیید نهایی کند")
         }
 
-        if (record.diagnosis.isNullOrBlank()) {
-            throw ir.tolooesalamat.app.exception.BusinessException("تشخیص خالی است")
+        if (record.isFinalized) {
+            throw BusinessException("این پرونده قبلاً تأیید شده است")
         }
 
+        if (record.diagnosis.isNullOrBlank()) {
+            throw BusinessException("تشخیص نمی‌تواند خالی باشد")
+        }
+
+        // امضای دیجیتال
         val timestamp = System.currentTimeMillis()
         val signature = digitalSignatureService.signDiagnosis(
             doctorId = currentUser.id!!,
@@ -190,17 +269,27 @@ class MedicalRecordService(
             details = "امضای دیجیتال پزشک"
         )
 
-        log.info("✅ پرونده نهایی شد: id=$id")
+        log.info("✅ پرونده نهایی شد: id=$id by ${currentUser.phone}")
         return medicalRecordMapper.toDto(saved)
     }
 
+    /**
+     * بررسی صحت امضای دیجیتال.
+     */
     fun verifySignature(id: Long, currentUser: User): Boolean {
         val record = findWithPermission(id, currentUser)
 
-        val signature = record.diagnosisSignature ?: return false
-        val diagnosis = record.diagnosis ?: return false
-        val timestamp = record.createdAt?.atZone(java.time.ZoneId.systemDefault())
-            ?.toInstant()?.toEpochMilli() ?: return false
+        val signature = record.diagnosisSignature
+        val diagnosis = record.diagnosis
+
+        if (signature.isNullOrBlank() || diagnosis.isNullOrBlank()) {
+            return false
+        }
+
+        val timestamp = record.finalizedAt
+            ?.atZone(ZoneId.systemDefault())
+            ?.toInstant()
+            ?.toEpochMilli() ?: return false
 
         return digitalSignatureService.verifyDiagnosis(
             doctorId = record.doctor.id!!,
@@ -212,7 +301,7 @@ class MedicalRecordService(
     }
 
     // ═══════════════════════════════════════════
-    // 🛠 متد کمکی
+    // 🛠 متد کمکی — بررسی دسترسی
     // ═══════════════════════════════════════════
 
     private fun findWithPermission(id: Long, currentUser: User): MedicalRecord {
