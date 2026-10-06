@@ -1,7 +1,8 @@
 package ir.tolooesalamat.app.service
 
-import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.domain.User
+import ir.tolooesalamat.app.domain.WeeklySchedule
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.dto.WeeklyScheduleDto
 import ir.tolooesalamat.app.exception.AccessDeniedException
 import ir.tolooesalamat.app.exception.BusinessException
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.DayOfWeek
+import java.time.LocalTime
 
 @Service
 @Transactional(readOnly = true)
@@ -26,10 +29,19 @@ class ScheduleService(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun getDoctorSchedule(doctorProfileId: Long): List<WeeklyScheduleDto> =
-        scheduleRepository.findAllByDoctorProfileId(doctorProfileId)
+    // ------------------------------------------------------------------ read
+
+    fun getDoctorSchedule(doctorProfileId: Long): List<WeeklyScheduleDto> {
+        // Fail fast if the doctor profile doesn't exist
+        if (!doctorProfileRepository.existsById(doctorProfileId)) {
+            throw ResourceNotFoundException.of("پروفایل پزشک", doctorProfileId)
+        }
+        return scheduleRepository.findAllByDoctorProfileId(doctorProfileId)
             .sortedBy { it.dayOfWeek.ordinal }
             .map { scheduleMapper.toDto(it) }
+    }
+
+    // ----------------------------------------------------------------- create
 
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
@@ -42,25 +54,9 @@ class ScheduleService(
         val profile = doctorProfileRepository.findById(doctorProfileId)
             .orElseThrow { ResourceNotFoundException.of("پروفایل پزشک", doctorProfileId) }
 
-        // پزشک فقط برنامه خودش
-        if (currentUser.role == Role.DOCTOR && profile.user.id != currentUser.id) {
-            throw AccessDeniedException("شما نمی‌توانید برنامه پزشک دیگری را تنظیم کنید")
-        }
-
-        // بررسی تداخل
-        if (scheduleRepository.existsByDoctorProfileIdAndDayOfWeek(
-                doctorProfileId, dto.dayOfWeek!!
-            )
-        ) {
-            throw DuplicateResourceException(
-                "برای روز ${dto.dayOfWeek} قبلاً برنامه ثبت شده است"
-            )
-        }
-
-        // اعتبارسنجی زمان
-        if (!dto.startTime!!.isBefore(dto.endTime!!)) {
-            throw BusinessException("ساعت پایان باید بعد از ساعت شروع باشد")
-        }
+        ensureOwnership(profile.user.id, currentUser)
+        validateTimeRange(dto)
+        ensureNoDayConflict(doctorProfileId, dto.dayOfWeek!!)
 
         val schedule = scheduleMapper.toEntity(dto, profile)
         val saved = scheduleRepository.save(schedule)
@@ -77,6 +73,8 @@ class ScheduleService(
         return scheduleMapper.toDto(saved)
     }
 
+    // ----------------------------------------------------------------- update
+
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     fun updateSchedule(
@@ -88,20 +86,30 @@ class ScheduleService(
         val schedule = scheduleRepository.findById(scheduleId)
             .orElseThrow { ResourceNotFoundException.of("برنامه", scheduleId) }
 
-        if (currentUser.role == Role.DOCTOR &&
-            schedule.doctorProfile.user.id != currentUser.id) {
-            throw AccessDeniedException("دسترسی غیرمجاز")
-        }
+        ensureOwnership(schedule.doctorProfile.user.id, currentUser)
+        validateTimeRange(dto)
 
-        if (!dto.startTime!!.isBefore(dto.endTime!!)) {
-            throw BusinessException("ساعت پایان باید بعد از ساعت شروع باشد")
+        // If the day is being changed, make sure the new day is free for this doctor
+        val newDay = dto.dayOfWeek!!
+        if (newDay != schedule.dayOfWeek) {
+            ensureNoDayConflict(schedule.doctorProfile.id, newDay)
         }
 
         scheduleMapper.updateEntity(schedule, dto)
         val saved = scheduleRepository.save(schedule)
 
+        accessLogService.logAccess(
+            user = currentUser,
+            resourceType = "SCHEDULE",
+            resourceId = saved.id,
+            action = "UPDATE",
+            details = "برنامه ${dto.dayOfWeek}: ${dto.startTime}-${dto.endTime}"
+        )
+
         return scheduleMapper.toDto(saved)
     }
+
+    // ----------------------------------------------------------------- delete
 
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
@@ -109,10 +117,7 @@ class ScheduleService(
         val schedule = scheduleRepository.findById(scheduleId)
             .orElseThrow { ResourceNotFoundException.of("برنامه", scheduleId) }
 
-        if (currentUser.role == Role.DOCTOR &&
-            schedule.doctorProfile.user.id != currentUser.id) {
-            throw AccessDeniedException("دسترسی غیرمجاز")
-        }
+        ensureOwnership(schedule.doctorProfile.user.id, currentUser)
 
         scheduleRepository.delete(schedule)
 
@@ -123,6 +128,8 @@ class ScheduleService(
             action = "DELETE"
         )
     }
+
+    // ------------------------------------------------------- replace all
 
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
@@ -135,16 +142,58 @@ class ScheduleService(
         val profile = doctorProfileRepository.findById(doctorProfileId)
             .orElseThrow { ResourceNotFoundException.of("پروفایل پزشک", doctorProfileId) }
 
-        if (currentUser.role == Role.DOCTOR && profile.user.id != currentUser.id) {
-            throw AccessDeniedException("دسترسی غیرمجاز")
-        }
+        ensureOwnership(profile.user.id, currentUser)
+
+        // Validate every entry *before* deleting the old ones
+        schedules.forEach { validateTimeRange(it) }
+        ensureNoDuplicateDays(schedules)
 
         scheduleRepository.deleteAllByDoctorProfileId(doctorProfileId)
 
-        val saved = schedules.map { dto ->
+        val saved: List<WeeklySchedule> = schedules.map { dto ->
             scheduleRepository.save(scheduleMapper.toEntity(dto, profile))
         }
 
+        accessLogService.logAccess(
+            user = currentUser,
+            resourceType = "SCHEDULE",
+            resourceId = doctorProfileId,
+            action = "REPLACE_ALL",
+            details = "${saved.size} برنامه جایگزین شد"
+        )
+
         return saved.map { scheduleMapper.toDto(it) }
+    }
+
+    // ----------------------------------------------------------------- helpers
+
+    private fun ensureOwnership(ownerUserId: Long?, currentUser: User) {
+        if (currentUser.role == Role.DOCTOR && ownerUserId != currentUser.id) {
+            throw AccessDeniedException("شما نمی‌توانید برنامه پزشک دیگری را تغییر دهید")
+        }
+    }
+
+    private fun validateTimeRange(dto: WeeklyScheduleDto) {
+        val start: LocalTime = dto.startTime
+            ?: throw BusinessException("ساعت شروع الزامی است")
+        val end: LocalTime = dto.endTime
+            ?: throw BusinessException("ساعت پایان الزامی است")
+        if (!start.isBefore(end)) {
+            throw BusinessException("ساعت پایان باید بعد از ساعت شروع باشد")
+        }
+    }
+
+    private fun ensureNoDayConflict(doctorProfileId: Long?, day: DayOfWeek) {
+        if (scheduleRepository.existsByDoctorProfileIdAndDayOfWeek(doctorProfileId, day)) {
+            throw DuplicateResourceException("برای روز $day قبلاً برنامه ثبت شده است")
+        }
+    }
+
+    private fun ensureNoDuplicateDays(schedules: List<WeeklyScheduleDto>) {
+        val days = schedules.map { it.dayOfWeek }
+        val duplicates = days.groupingBy { it }.eachCount().filterValues { it > 1 }.keys
+        if (duplicates.isNotEmpty()) {
+            throw DuplicateResourceException("روزهای تکراری در لیست: $duplicates")
+        }
     }
 }
