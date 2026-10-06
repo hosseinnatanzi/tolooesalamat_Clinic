@@ -1,7 +1,7 @@
 package ir.tolooesalamat.app.security.jwt
 
-import ir.tolooesalamat.app.domain.User
 import ir.tolooesalamat.app.crypto.core.RsaKeyManager
+import ir.tolooesalamat.app.domain.User
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
@@ -12,12 +12,22 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.UUID
 
+/**
+ * سرویس JWT با الگوریتم RS256.
+ *
+ * امضا: RSA Private Key
+ * تأیید: RSA Public Key
+ *
+ * کاربردها:
+ *  - تولید Access Token
+ *  - تولید Refresh Token
+ *  - اعتبارسنجی و استخراج داده‌ها
+ */
 @Service
 class JwtService(
     private val jwtProperties: JwtProperties,
     private val rsaKeyManager: RsaKeyManager
 ) {
-
     private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {
@@ -78,7 +88,7 @@ class JwtService(
     fun validateAndParse(token: String): Claims? = try {
         Jwts.parser()
             .verifyWith(rsaKeyManager.getPublicKey())
-            .requireIssuer(jwtProperties.issuer)          // still valid in 0.12.x
+            .requireIssuer(jwtProperties.issuer)
             .clockSkewSeconds(jwtProperties.clockSkewSeconds)
             .build()
             .parseSignedClaims(token)

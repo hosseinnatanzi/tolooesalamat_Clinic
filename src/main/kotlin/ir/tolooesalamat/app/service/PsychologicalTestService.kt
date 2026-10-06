@@ -4,7 +4,7 @@ import ir.tolooesalamat.app.crypto.core.DigitalSignatureService
 import ir.tolooesalamat.app.domain.PsychologicalTest
 import ir.tolooesalamat.app.domain.Role
 import ir.tolooesalamat.app.domain.TestResult
-import ir.tolooesalamat.app.domain.User
+import ir.tolooesalamat.app.domain.Userz
 import ir.tolooesalamat.app.dto.*
 import ir.tolooesalamat.app.exception.AccessDeniedException
 import ir.tolooesalamat.app.exception.BusinessException

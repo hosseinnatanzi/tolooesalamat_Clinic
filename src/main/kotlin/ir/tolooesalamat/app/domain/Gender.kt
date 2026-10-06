@@ -1,8 +1,5 @@
 package ir.tolooesalamat.app.domain
 
-/**
- * جنسیت کاربر.
- */
 enum class Gender(val label: String) {
     MALE("مرد"),
     FEMALE("زن");

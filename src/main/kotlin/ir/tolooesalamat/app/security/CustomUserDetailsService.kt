@@ -18,7 +18,7 @@ class CustomUserDetailsService(
 
     @Transactional(readOnly = true)
     override fun loadUserByUsername(username: String): UserDetails {
-        // جستجو با phone (شناسه لاگین)
+        // جستجو با phone (چون لاگین با موبایل است)
         val user = userRepository.findByPhone(username)
             ?: userRepository.findByUsername(username)
             ?: throw UsernameNotFoundException("کاربر '$username' یافت نشد")

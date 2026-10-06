@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails
 
 /**
  * پیاده‌سازی UserDetails برای Spring Security.
+ *
+ * شامل اطلاعات کاربر جاری که در SecurityContext ذخیره می‌شود.
  */
 class CustomUserDetails(val user: User) : UserDetails {
 

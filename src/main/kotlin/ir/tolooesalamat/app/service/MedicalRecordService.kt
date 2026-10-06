@@ -4,10 +4,7 @@ import ir.tolooesalamat.app.crypto.core.DigitalSignatureService
 import ir.tolooesalamat.app.domain.MedicalRecord
 import ir.tolooesalamat.app.domain.Role
 import ir.tolooesalamat.app.domain.User
-import ir.tolooesalamat.app.dto.MedicalRecordDto
-import ir.tolooesalamat.app.dto.MedicalRecordSearchRequest
-import ir.tolooesalamat.app.dto.MedicalRecordSummaryDto
-import ir.tolooesalamat.app.dto.PagedResponse
+import ir.tolooesalamat.app.dto.*
 import ir.tolooesalamat.app.exception.AccessDeniedException
 import ir.tolooesalamat.app.exception.BusinessException
 import ir.tolooesalamat.app.exception.ResourceNotFoundException

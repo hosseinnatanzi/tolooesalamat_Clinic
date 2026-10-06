@@ -12,15 +12,10 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
-/**
- * ثبت دسترسی به داده‌های حساس.
- * در یک Transaction جداگانه اجرا می‌شود تا اگر عملیات اصلی Rollback شد، لاگ حفظ شود.
- */
 @Service
 class AccessLogService(
     private val accessLogRepository: AccessLogRepository
 ) {
-
     private val log = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -34,28 +29,19 @@ class AccessLogService(
     ) {
         try {
             val request = currentRequest()
-
-            val accessLog = AccessLog(
-                userId = user?.id,
-                username = user?.username ?: currentUsername(),
-                resourceType = resourceType,
-                resourceId = resourceId,
-                action = action,
-                ipAddress = extractIp(request),
-                userAgent = request?.getHeader("User-Agent")?.take(500),
-                success = success,
-                details = details
+            accessLogRepository.save(
+                AccessLog(
+                    userId = user?.id,
+                    username = user?.username ?: currentUsername(),
+                    resourceType = resourceType,
+                    resourceId = resourceId,
+                    action = action,
+                    ipAddress = extractIp(request),
+                    success = success,
+                    details = details
+                )
             )
-
-            accessLogRepository.save(accessLog)
-
-            if (!success) {
-                log.warn("🚨 دسترسی ناموفق: user=${accessLog.username}, " +
-                        "resource=$resourceType:$resourceId, action=$action")
-            }
-
         } catch (ex: Exception) {
-            // شکست در ثبت لاگ، عملیات اصلی را متوقف نمی‌کند
             log.error("خطا در ثبت AccessLog: ${ex.message}", ex)
         }
     }
@@ -68,21 +54,7 @@ class AccessLogService(
 
     private fun extractIp(request: HttpServletRequest?): String? {
         if (request == null) return null
-
-        val headers = listOf(
-            "X-Forwarded-For",
-            "X-Real-IP",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP"
-        )
-
-        for (header in headers) {
-            val ip = request.getHeader(header)
-            if (!ip.isNullOrBlank() && ip != "unknown") {
-                return ip.split(",").first().trim()
-            }
-        }
-
-        return request.remoteAddr
+        return request.getHeader("X-Forwarded-For")?.split(",")?.first()?.trim()
+            ?: request.remoteAddr
     }
 }

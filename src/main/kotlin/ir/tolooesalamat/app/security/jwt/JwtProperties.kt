@@ -1,20 +1,13 @@
 package ir.tolooesalamat.app.security.jwt
-
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
 
-/**
- * تنظیمات JWT.
- * مقادیر از application.yml خوانده می‌شوند.
- */
-@Component
 @ConfigurationProperties(prefix = "app.jwt")
 data class JwtProperties(
-    var issuer: String = "clinic-app",
-    var audience: String = "clinic-users",
-    var expirationHours: Long = 24,
-    var refreshExpirationDays: Long = 1,
-    var header: String = "Authorization",
-    var prefix: String = "Bearer ",
-    var clockSkewSeconds: Long = 30
+    val issuer: String = "clinic-app",
+    val audience: String = "clinic-users",
+    val expirationHours: Long = 24,
+    val refreshExpirationDays: Long = 1,
+    val header: String = "Authorization",
+    val prefix: String = "Bearer ",
+    val clockSkewSeconds: Long = 30
 )

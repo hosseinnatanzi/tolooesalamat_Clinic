@@ -1,5 +1,6 @@
 package ir.tolooesalamat.app.domain
 
+import ir.tolooesalamat.app.crypto.converter.EncryptedStringConverter
 import jakarta.persistence.*
 
 @Entity
@@ -13,19 +14,40 @@ import jakarta.persistence.*
     ]
 )
 class User(
+
+    // ─── شناسه‌ها ───
     @Column(name = "phone", unique = true, nullable = false, length = 11)
     var phone: String = "",
 
-    @Column(name = "landline", length = 15)
+    @Convert(converter = EncryptedStringConverter::class)
+    @Column(name = "landline_enc", columnDefinition = "TEXT")
     var landline: String? = null,
 
+    @Column(name = "username", unique = true, nullable = false, length = 50)
+    var username: String = "",
+
+    @Convert(converter = EncryptedStringConverter::class)
+    @Column(name = "email_enc", columnDefinition = "TEXT")
+    var email: String? = null,
+
+    @Convert(converter = EncryptedStringConverter::class)
+    @Column(name = "national_id_enc", columnDefinition = "TEXT")
+    var nationalId: String? = null,
+
+    // ─── احراز هویت ───
     @Column(name = "password", nullable = false, length = 100)
     var password: String = "",
 
-    @Column(name = "first_name", nullable = false, length = 50)
+    @Column(name = "enabled", nullable = false)
+    var enabled: Boolean = true,
+
+    // ─── اطلاعات شخصی ───
+    @Convert(converter = EncryptedStringConverter::class)
+    @Column(name = "first_name_enc", columnDefinition = "TEXT", nullable = false)
     var firstName: String = "",
 
-    @Column(name = "last_name", nullable = false, length = 50)
+    @Convert(converter = EncryptedStringConverter::class)
+    @Column(name = "last_name_enc", columnDefinition = "TEXT", nullable = false)
     var lastName: String = "",
 
     @Column(name = "age")
@@ -35,50 +57,44 @@ class User(
     @Column(name = "gender", nullable = false, length = 10)
     var gender: Gender = Gender.FEMALE,
 
-    @Column(name = "username", unique = true, nullable = false, length = 50)
-    var username: String = "",
-
-    @Column(name = "email", unique = true, length = 100)
-    var email: String? = null,
-
-    @Column(name = "national_id", unique = true, length = 10)
-    var nationalId: String? = null,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     var role: Role = Role.PATIENT,
 
-    @Column(name = "enabled", nullable = false)
-    var enabled: Boolean = true,
-
-    // ═══════════ روابط ═══════════
-
+    // ─── روابط ───
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "clinic_id", foreignKey = ForeignKey(name = "fk_user_clinic"))
+    @JoinColumn(name = "clinic_id",
+        foreignKey = ForeignKey(name = "fk_user_clinic"))
     var clinic: Clinic? = null,
 
-    @OneToOne(
-        mappedBy = "user",
-        cascade = [CascadeType.ALL],
-        fetch = FetchType.LAZY,
-        orphanRemoval = true
-    )
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL],
+        fetch = FetchType.LAZY, orphanRemoval = true)
     var doctorProfile: DoctorProfile? = null,
 
-    @OneToOne(
-        mappedBy = "user",
-        cascade = [CascadeType.ALL],
-        fetch = FetchType.LAZY,
-        orphanRemoval = true
-    )
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL],
+        fetch = FetchType.LAZY, orphanRemoval = true)
     var patientProfile: PatientProfile? = null,
 
-    // 🆕 روابط تست‌های روانشناسی
-    @OneToMany(mappedBy = "doctor", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var performedTests: MutableList<TestResult> = mutableListOf(),
+    // نوبت‌ها
+    @OneToMany(mappedBy = "doctor", fetch = FetchType.LAZY)
+    var doctorAppointments: MutableList<Appointment> = mutableListOf(),
 
-    @OneToMany(mappedBy = "patient", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var testResults: MutableList<TestResult> = mutableListOf()
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+    var patientAppointments: MutableList<Appointment> = mutableListOf(),
+
+    // پرونده‌ها
+    @OneToMany(mappedBy = "doctor", fetch = FetchType.LAZY)
+    var doctorMedicalRecords: MutableList<MedicalRecord> = mutableListOf(),
+
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+    var patientMedicalRecords: MutableList<MedicalRecord> = mutableListOf(),
+
+    // تست‌ها
+    @OneToMany(mappedBy = "doctor", fetch = FetchType.LAZY)
+    var doctorTestResults: MutableList<TestResult> = mutableListOf(),
+
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+    var patientTestResults: MutableList<TestResult> = mutableListOf()
 
 ) : BaseEntity() {
     constructor(
@@ -113,18 +129,8 @@ class User(
     val fullName: String
         get() = "$firstName $lastName".trim()
 
-    @get:Transient
-    val displayName: String
-        get() = fullName.ifBlank { phone }
-
-    @get:Transient
-    val allContacts: String
-        get() = listOfNotNull(phone, landline).joinToString(" / ")
-
     fun hasRole(vararg roles: Role): Boolean = role in roles
-    fun isFemale(): Boolean = gender == Gender.FEMALE
-    fun isMale(): Boolean = gender == Gender.MALE
 
     override fun toString(): String =
-        "User(id=$id, phone='$phone', role=$role, enabled=$enabled)"
+        "User(id=$id, phone='$phone', role=$role)"
 }

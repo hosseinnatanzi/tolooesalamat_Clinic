@@ -1,6 +1,7 @@
 package ir.tolooesalamat.app.mapper
 
 import ir.tolooesalamat.app.domain.Appointment
+import ir.tolooesalamat.app.domain.User
 import ir.tolooesalamat.app.dto.AppointmentDto
 import ir.tolooesalamat.app.dto.AppointmentSummaryDto
 import org.springframework.stereotype.Component
@@ -45,8 +46,8 @@ class AppointmentMapper {
 
     fun toEntity(
         dto: AppointmentDto,
-        doctor: ir.tolooesalamat.app.domain.User,
-        patient: ir.tolooesalamat.app.domain.User
+        doctor: User,
+        patient: User
     ): Appointment = Appointment(
         doctor = doctor,
         patient = patient,
