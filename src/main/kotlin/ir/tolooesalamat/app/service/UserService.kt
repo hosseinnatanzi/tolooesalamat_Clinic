@@ -120,8 +120,11 @@ class UserService(
             throw BusinessException("رمز عبور الزامی است")
         }
 
+        // ✅ رفع خطا: encode() ممکن است String? برگرداند
         val encodedPassword = passwordEncoder.encode(dto.password)
-        val user = userMapper.toEntity(dto, encodedPassword)
+            ?: throw BusinessException("خطا در رمزنگاری رمز عبور")
+
+        val user = userMapper.toEntity(dto, encodedPassword)  // ← الان String
         val saved = userRepository.save(user)
 
         accessLogService.logAccess(
