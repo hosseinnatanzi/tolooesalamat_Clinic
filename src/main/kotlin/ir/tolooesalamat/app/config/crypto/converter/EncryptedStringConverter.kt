@@ -1,6 +1,4 @@
-package ir.tolooesalamat.app.config.crypto.converter
-
-
+package ir.tolooesalamat.app.crypto.converter
 
 import ir.tolooesalamat.app.crypto.core.HybridEncryptor
 import jakarta.persistence.AttributeConverter
@@ -10,10 +8,10 @@ import org.springframework.stereotype.Component
 /**
  * Converter خودکار JPA برای رمزنگاری/رمزگشایی فیلدهای String.
  *
- * استفاده در Entity:
+ * استفاده:
  * @Convert(converter = EncryptedStringConverter::class)
- * @Column(name = "diagnosis_enc", columnDefinition = "TEXT")
- * var diagnosis: String? = null
+ * @Column(name = "field_enc", columnDefinition = "TEXT")
+ * var field: String? = null
  */
 @Component
 @Converter
@@ -23,7 +21,12 @@ class EncryptedStringConverter(
 
     override fun convertToDatabaseColumn(attribute: String?): String? {
         if (attribute.isNullOrBlank()) return attribute
-        return hybridEncryptor.encrypt(attribute)
+        return try {
+            hybridEncryptor.encrypt(attribute)
+        } catch (e: Exception) {
+            // اگر رمزنگاری شکست خورد، مقدار خام را ذخیره کن
+            attribute
+        }
     }
 
     override fun convertToEntityAttribute(dbData: String?): String? {
@@ -31,7 +34,7 @@ class EncryptedStringConverter(
         return try {
             hybridEncryptor.decrypt(dbData)
         } catch (e: Exception) {
-            // اگر رمزگشایی نشد، احتمالاً داده قدیمی (plain) است
+            // اگر رمزگشایی شکست خورد، احتمالاً داده قدیمی (plain) است
             dbData
         }
     }

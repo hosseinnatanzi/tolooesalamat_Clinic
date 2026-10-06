@@ -5,14 +5,15 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConfigurationProperties(prefix = "app.crypto")
-data class CryptoProperties(
-    var publicKeyPath: String = "classpath:keys/app-public.pem",
-    var privateKeyPath: String = "classpath:keys/app-private-encrypted.pem",
-    var privateKeyPassword: String = "",
-    var rsaAlgorithm: String = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding",
-    var aesAlgorithm: String = "AES/GCM/NoPadding",
-    var aesKeySize: Int = 256,
-    var ivLength: Int = 12,
-    var gcmTagLength: Int = 128,
+class CryptoProperties {
+
+    var publicKeyPath: String = "classpath:keys/public.pem"
+    var privateKeyPath: String = "classpath:keys/private.pem"
+    var privateKeyPassword: String = ""
+    var rsaAlgorithm: String = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+    var aesAlgorithm: String = "AES/GCM/NoPadding"
+    var aesKeySize: Int = 256
+    var ivLength: Int = 12
+    var gcmTagLength: Int = 128
     var signatureAlgorithm: String = "SHA256withRSA"
-)
+}

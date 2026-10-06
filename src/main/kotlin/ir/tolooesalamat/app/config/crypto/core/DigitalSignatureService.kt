@@ -1,6 +1,5 @@
 package ir.tolooesalamat.app.crypto.core
 
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Base64
 
@@ -8,25 +7,20 @@ import java.util.Base64
 class DigitalSignatureService(
     private val rsaKeyManager: RsaKeyManager
 ) {
-
-    private val log = LoggerFactory.getLogger(javaClass)
-
     fun sign(data: String): String =
-        Base64.getEncoder().encodeToString(rsaKeyManager.sign(data.toByteArray(Charsets.UTF_8)))
+        Base64.getEncoder().encodeToString(
+            rsaKeyManager.sign(data.toByteArray(Charsets.UTF_8))
+        )
 
     fun verify(data: String, signatureBase64: String): Boolean = try {
         rsaKeyManager.verify(
             data.toByteArray(Charsets.UTF_8),
             Base64.getDecoder().decode(signatureBase64)
         )
-    } catch (e: Exception) {
-        log.debug("خطا در بررسی امضا: ${e.message}")
-        false
-    }
+    } catch (e: Exception) { false }
 
-    fun signDiagnosis(
-        doctorId: Long, patientId: Long, diagnosis: String, timestamp: Long
-    ): String = sign("doctor=$doctorId|patient=$patientId|diagnosis=$diagnosis|ts=$timestamp")
+    fun signDiagnosis(doctorId: Long, patientId: Long, diagnosis: String, timestamp: Long): String =
+        sign("doctor=$doctorId|patient=$patientId|diagnosis=$diagnosis|ts=$timestamp")
 
     fun verifyDiagnosis(
         doctorId: Long, patientId: Long, diagnosis: String,
