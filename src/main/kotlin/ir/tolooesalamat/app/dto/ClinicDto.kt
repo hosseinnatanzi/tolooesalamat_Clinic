@@ -3,6 +3,9 @@ package ir.tolooesalamat.app.dto
 import jakarta.validation.constraints.*
 import java.time.LocalDateTime
 
+/**
+ * DTO کامل مطب.
+ */
 data class ClinicDto(
     val id: Long? = null,
 
@@ -10,16 +13,11 @@ data class ClinicDto(
     @field:Size(min = 2, max = 100)
     val name: String = "",
 
-    @field:Size(max = 1000)
+    @field:Size(max = 2000)
     val address: String? = null,
 
-    @field:Pattern(regexp = "^$|^09[0-9]{9}$")
     val mobile: String? = null,
-
-    @field:Pattern(regexp = "^$|^0[0-9]{1,2}[0-9]{7,11}$")
     val landline: String? = null,
-
-    @field:Email
     val email: String? = null,
 
     val active: Boolean = true,
@@ -28,6 +26,9 @@ data class ClinicDto(
     val updatedAt: LocalDateTime? = null
 )
 
+/**
+ * DTO خلاصه مطب (برای dropdown).
+ */
 data class ClinicSummaryDto(
     val id: Long,
     val name: String,

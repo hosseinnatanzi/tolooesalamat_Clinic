@@ -1,14 +1,11 @@
 package ir.tolooesalamat.app.service
 
-import ir.tolooesalamat.app.domain.Clinic
-import ir.tolooesalamat.app.domain.User
-import ir.tolooesalamat.app.dto.ClinicDto
-import ir.tolooesalamat.app.dto.ClinicSummaryDto
-import ir.tolooesalamat.app.exception.BusinessException
-import ir.tolooesalamat.app.exception.DuplicateResourceException
+ import ir.tolooesalamat.app.domain.*
+import ir.tolooesalamat.app.dto.*
+ import ir.tolooesalamat.app.exception.DuplicateResourceException
 import ir.tolooesalamat.app.exception.ResourceNotFoundException
-import ir.tolooesalamat.app.mapper.ClinicMapper
-import ir.tolooesalamat.app.repository.ClinicRepository
+import ir.tolooesalamat.app.mapper.*
+import ir.tolooesalamat.app.repository.*
 import org.slf4j.LoggerFactory
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service

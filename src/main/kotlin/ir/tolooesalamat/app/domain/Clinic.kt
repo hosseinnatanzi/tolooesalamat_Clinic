@@ -4,8 +4,14 @@ import ir.tolooesalamat.app.crypto.converter.EncryptedStringConverter
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "clinics")
+@Table(
+    name = "clinics",
+    indexes = [
+        Index(name = "idx_clinic_name", columnList = "name", unique = true)
+    ]
+)
 class Clinic(
+
     @Column(name = "name", nullable = false, unique = true, length = 100)
     var name: String = "",
 
@@ -27,4 +33,9 @@ class Clinic(
 
     @Column(name = "active", nullable = false)
     var active: Boolean = true
-) : BaseEntity()
+
+) : BaseEntity() {
+
+    override fun toString(): String =
+        "Clinic(id=$id, name='$name')"
+}
