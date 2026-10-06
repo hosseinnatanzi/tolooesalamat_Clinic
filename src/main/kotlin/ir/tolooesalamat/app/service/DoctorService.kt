@@ -1,10 +1,8 @@
 package ir.tolooesalamat.app.service
 
-import ir.tolooesalamat.app.domain.DoctorProfile
+import ir.tolooesalamat.app.domain.*
 import ir.tolooesalamat.app.domain.enum.Role
-import ir.tolooesalamat.app.domain.User
-import ir.tolooesalamat.app.dto.DoctorProfileDto
-import ir.tolooesalamat.app.dto.DoctorSummaryDto
+import ir.tolooesalamat.app.dto.*
 import ir.tolooesalamat.app.exception.BusinessException
 import ir.tolooesalamat.app.exception.DuplicateResourceException
 import ir.tolooesalamat.app.exception.ResourceNotFoundException

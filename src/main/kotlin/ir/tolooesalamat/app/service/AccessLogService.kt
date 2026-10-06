@@ -22,7 +22,7 @@ class AccessLogService(
     fun logAccess(
         user: User?,
         resourceType: String,
-        resourceId: Long?,
+        resourceId: Long?,              // ← Long? (nullable)
         action: String,
         success: Boolean = true,
         details: String? = null
@@ -37,6 +37,7 @@ class AccessLogService(
                     resourceId = resourceId,
                     action = action,
                     ipAddress = extractIp(request),
+                    userAgent = request?.getHeader("User-Agent")?.take(500),   // ← این فیلد هم مهم است
                     success = success,
                     details = details
                 )

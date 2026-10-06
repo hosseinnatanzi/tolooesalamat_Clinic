@@ -4,7 +4,14 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "access_logs")
+@Table(
+    name = "access_logs",
+    indexes = [
+        Index(name = "idx_log_user", columnList = "username"),
+        Index(name = "idx_log_time", columnList = "accessed_at"),
+        Index(name = "idx_log_resource", columnList = "resource_type, resource_id")
+    ]
+)
 class AccessLog(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +35,10 @@ class AccessLog(
     @Column(name = "ip_address", length = 45)
     var ipAddress: String? = null,
 
+    // 🆕 این فیلد باید باشد:
+    @Column(name = "user_agent", length = 500)
+    var userAgent: String? = null,
+
     @Column(name = "accessed_at", nullable = false, updatable = false)
     var accessedAt: LocalDateTime = LocalDateTime.now(),
 
@@ -36,4 +47,7 @@ class AccessLog(
 
     @Column(name = "details", columnDefinition = "TEXT")
     var details: String? = null
-)
+) {
+    override fun toString(): String =
+        "AccessLog(user='$username', action='$action')"
+}
