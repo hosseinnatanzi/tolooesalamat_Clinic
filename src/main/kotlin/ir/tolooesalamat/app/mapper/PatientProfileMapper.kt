@@ -1,6 +1,7 @@
 package ir.tolooesalamat.app.mapper
 
 import ir.tolooesalamat.app.domain.PatientProfile
+import ir.tolooesalamat.app.domain.User
 import ir.tolooesalamat.app.dto.PatientProfileDto
 import ir.tolooesalamat.app.dto.PatientSummaryDto
 import org.springframework.stereotype.Component
@@ -19,7 +20,6 @@ class PatientProfileMapper {
         emergencyContactMobile = profile.emergencyContactMobile,
         emergencyContactLandline = profile.emergencyContactLandline,
         emergencyContactRelation = profile.emergencyContactRelation,
-        // 🔓 رمزگشایی خودکار از طریق Converter
         medicalHistory = profile.medicalHistory,
         currentMedications = profile.currentMedications,
         allergies = profile.allergies,
@@ -29,7 +29,7 @@ class PatientProfileMapper {
         fileStatus = profile.fileStatus,
         userFullName = profile.user.fullName,
         userPhone = profile.user.phone,
-        totalTests = profile.testResults.size,
+        // totalTests حذف شد — از Repository محاسبه می‌شود
         createdAt = profile.createdAt
     )
 
@@ -44,8 +44,8 @@ class PatientProfileMapper {
 
     fun toEntity(
         dto: PatientProfileDto,
-        user: ir.tolooesalamat.app.domain.User,
-        primaryDoctor: ir.tolooesalamat.app.domain.User? = null
+        user: User,
+        primaryDoctor: User? = null
     ): PatientProfile = PatientProfile(
         user = user,
         fileNumber = dto.fileNumber,
