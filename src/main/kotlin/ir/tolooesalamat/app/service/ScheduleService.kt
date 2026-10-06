@@ -1,9 +1,7 @@
 package ir.tolooesalamat.app.service
 
-import ir.tolooesalamat.app.domain.DoctorProfile
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.domain.User
-import ir.tolooesalamat.app.domain.WeeklySchedule
 import ir.tolooesalamat.app.dto.WeeklyScheduleDto
 import ir.tolooesalamat.app.exception.AccessDeniedException
 import ir.tolooesalamat.app.exception.BusinessException
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.DayOfWeek
 
 @Service
 @Transactional(readOnly = true)

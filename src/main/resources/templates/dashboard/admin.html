@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد مدیر | کلینیک روان‌پزشکی</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 36px;
+            margin: 24px auto;
+            max-width: 1200px;
+        }
+        .hero h1 { font-size: 26px; margin-bottom: 8px; }
+        .hero p { opacity: 0.9; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        .stat-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .stat-icon.blue { background: linear-gradient(135deg, #6366f1, #06b6d4); }
+        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .action-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            text-decoration: none;
+            color: #1e293b;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.25s;
+            border: 1.5px solid transparent;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            border-color: #a5b4fc;
+        }
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 12px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+        .action-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .action-desc {
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="hero">
+    <h1>👑 خوش آمدید، مدیر سیستم</h1>
+    <p>مدیریت کامل کاربران، مطب‌ها، تخصص‌ها و گزارش‌ها</p>
+</div>
+
+<div class="container">
+
+    <!-- آمار -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="stat-icon purple">👥</div>
+            <div>
+                <div class="stat-value" id="totalUsers">—</div>
+                <div class="stat-label">کل کاربران</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">👨‍⚕️</div>
+            <div>
+                <div class="stat-value" id="totalDoctors">—</div>
+                <div class="stat-label">پزشکان</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">🧑</div>
+            <div>
+                <div class="stat-value" id="totalPatients">—</div>
+                <div class="stat-label">بیماران</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">📅</div>
+            <div>
+                <div class="stat-value" id="todayAppointments">—</div>
+                <div class="stat-label">نوبت‌های امروز</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- دسترسی سریع -->
+    <h2 style="font-size: 18px; margin: 24px 0 16px; display: flex; align-items: center; gap: 8px;">
+        <span>⚡</span> دسترسی سریع
+    </h2>
+
+    <div class="quick-actions">
+        <a href="/admin/users" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                👥
+            </div>
+            <div class="action-title">مدیریت کاربران</div>
+            <div class="action-desc">افزودن، ویرایش و مدیریت نقش‌ها</div>
+        </a>
+
+        <a href="/admin/specialties" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #6366f1, #06b6d4);">
+                🩺
+            </div>
+            <div class="action-title">تخصص‌ها</div>
+            <div class="action-desc">مدیریت تخصص‌های پزشکی</div>
+        </a>
+
+        <a href="/admin/clinics" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                🏥
+            </div>
+            <div class="action-title">مطب‌ها</div>
+            <div class="action-desc">مدیریت مطب و شعبه‌ها</div>
+        </a>
+
+        <a href="/admin/access-logs" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                📊
+            </div>
+            <div class="action-title">گزارش دسترسی‌ها</div>
+            <div class="action-desc">بررسی لاگ دسترسی به داده‌ها</div>
+        </a>
+
+        <a href="/swagger-ui.html" target="_blank" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                📚
+            </div>
+            <div class="action-title">Swagger API</div>
+            <div class="action-desc">مستندات کامل API</div>
+        </a>
+
+        <a href="/api/admin/crypto/health" target="_blank" class="action-card">
+            <div class="action-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                🔐
+            </div>
+            <div class="action-title">سلامت رمزنگاری</div>
+            <div class="action-desc">بررسی RSA و AES</div>
+        </a>
+    </div>
+
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script>
+    async function loadStats() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/dashboard/admin', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('totalDoctors').textContent = data.totalDoctors || 0;
+                document.getElementById('totalPatients').textContent = data.totalPatients || 0;
+                document.getElementById('todayAppointments').textContent = data.todayTotal || 0;
+
+                // برای کل کاربران، از API جداگانه استفاده کن
+                const usersRes = await fetch('/api/admin/users?size=1', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (usersRes.ok) {
+                    const usersData = await usersRes.json();
+                    document.getElementById('totalUsers').textContent = usersData.totalElements || 0;
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    loadStats();
+</script>
+
+</body>
+</html>

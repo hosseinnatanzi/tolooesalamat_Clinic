@@ -1,6 +1,6 @@
 package ir.tolooesalamat.app.dto
 
-import ir.tolooesalamat.app.domain.Gender
+import ir.tolooesalamat.app.domain.enum.Gender        // ← import جدید
 import jakarta.validation.constraints.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -16,16 +16,13 @@ data class PatientProfileDto(
     val birthDate: LocalDate? = null,
     val gender: Gender? = null,
 
-    @field:Size(max = 1000)
+    @field:Size(max = 2000)
     val address: String? = null,
 
     @field:Size(max = 100)
     val emergencyContactName: String? = null,
 
-    @field:Pattern(regexp = "^$|^09[0-9]{9}$")
     val emergencyContactMobile: String? = null,
-
-    @field:Pattern(regexp = "^$|^0[0-9]{1,2}[0-9]{7,11}$")
     val emergencyContactLandline: String? = null,
 
     @field:Size(max = 50)
@@ -43,8 +40,6 @@ data class PatientProfileDto(
 
     val userFullName: String? = null,
     val userPhone: String? = null,
-    val totalTests: Int = 0,
-    val totalSessions: Int = 0,
     val createdAt: LocalDateTime? = null
 )
 

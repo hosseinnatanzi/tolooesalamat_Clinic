@@ -1,8 +1,8 @@
 package ir.tolooesalamat.app.service
 
-import ir.tolooesalamat.app.domain.Gender
+import ir.tolooesalamat.app.domain.enum.Gender
 import ir.tolooesalamat.app.domain.PatientProfile
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.domain.User
 import ir.tolooesalamat.app.dto.AuthResponse
 import ir.tolooesalamat.app.dto.LoginRequest

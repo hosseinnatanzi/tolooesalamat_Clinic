@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="footerStyles">
+    <style>
+        .footer {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 30px 24px;
+            margin-top: auto;
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: 700;
+        }
+        .footer-text {
+            font-size: 13px;
+        }
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+        }
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<footer th:fragment="footer" class="footer">
+    <div class="footer-inner">
+        <div class="footer-logo">
+            <div style="width:32px; height:32px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:8px; display:flex; align-items:center; justify-content:center;">🧠</div>
+            <span>کلینیک روان‌پزشکی</span>
+        </div>
+        <div class="footer-text">
+            © ۱۴۰۴ — تمامی حقوق محفوظ است
+        </div>
+        <div class="footer-links">
+            <a href="/about">درباره ما</a>
+            <a href="/contact">تماس با ما</a>
+            <a href="/privacy">حریم خصوصی</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

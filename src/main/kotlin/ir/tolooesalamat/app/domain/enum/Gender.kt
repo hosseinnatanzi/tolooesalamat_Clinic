@@ -1,4 +1,4 @@
-package ir.tolooesalamat.app.domain
+package ir.tolooesalamat.app.domain.enum
 
 enum class Gender(val label: String) {
     MALE("مرد"),

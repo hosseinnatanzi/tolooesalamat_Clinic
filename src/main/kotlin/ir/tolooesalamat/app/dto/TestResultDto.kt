@@ -1,6 +1,6 @@
 package ir.tolooesalamat.app.dto
 
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 data class TestResultDto(
@@ -15,24 +15,13 @@ data class TestResultDto(
     val doctorId: Long? = null,
     val testDate: LocalDateTime? = null,
 
-    @field:Size(max = 2000)
     val rawScore: String? = null,
-
-    @field:Size(max = 10000)
     val interpretation: String? = null,
-
-    @field:Size(max = 5000)
     val diagnosis: String? = null,
-
-    @field:Size(max = 20000)
     val rawData: String? = null,
-
-    @field:Size(max = 5000)
     val recommendations: String? = null,
 
     val doctorSignature: String? = null,
-
-    @field:Pattern(regexp = "^(NORMAL|CONFIDENTIAL|HIGHLY_CONFIDENTIAL)$")
     val confidentialityLevel: String = "HIGHLY_CONFIDENTIAL",
 
     val patientName: String? = null,
@@ -61,19 +50,10 @@ data class RecordTestResultRequest(
     @field:NotNull(message = "انتخاب تست الزامی است")
     val testId: Long? = null,
 
-    @field:Size(max = 2000)
     val rawScore: String? = null,
-
-    @field:Size(max = 10000)
     val interpretation: String? = null,
-
-    @field:Size(max = 5000)
     val diagnosis: String? = null,
-
-    @field:Size(max = 20000)
     val rawData: String? = null,
-
-    @field:Size(max = 5000)
     val recommendations: String? = null
 )
 

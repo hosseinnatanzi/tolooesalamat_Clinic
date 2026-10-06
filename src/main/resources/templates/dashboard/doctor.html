@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="fa" dir="rtl">
+<head th:replace="~{layouts/main :: head(title='داشبورد پزشک')}"></head>
+<body>
+
+<!-- هدر -->
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main style="max-width: 1200px; margin: 0 auto; padding: 30px 24px 60px;">
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>👨‍⚕️ خوش آمدید، دکتر <span sec:authentication="principal.fullName">پزشک</span></h1>
+        <p>نوبت‌های امروز و برنامه کاری خود را مشاهده کنید</p>
+    </div>
+
+    <!-- آمار -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="stat-icon blue">📅</div>
+            <div>
+                <div class="stat-value" id="totalToday">—</div>
+                <div class="stat-label">کل نوبت‌های امروز</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-value" id="completedToday">—</div>
+                <div class="stat-label">انجام‌شده</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">⏳</div>
+            <div>
+                <div class="stat-value" id="pendingToday">—</div>
+                <div class="stat-label">در انتظار</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon pink">🔄</div>
+            <div>
+                <div class="stat-value" id="queueCount">—</div>
+                <div class="stat-label">در صف</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- صف انتظار امروز -->
+    <div class="card" style="margin-top: 24px;">
+        <h2 style="font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span>🕐</span> صف انتظار امروز
+        </h2>
+
+        <div id="queueContainer">
+            <div class="loading">در حال بارگذاری...</div>
+        </div>
+    </div>
+
+</main>
+
+<!-- فوتر -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- استایل داشبورد -->
+<style>
+    .hero {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 36px;
+        margin-bottom: 24px;
+    }
+    .hero h1 { font-size: 26px; margin-bottom: 8px; }
+    .hero p { opacity: 0.9; font-size: 15px; }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border: 1px solid #f1f5f9;
+    }
+    .stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: white;
+        flex-shrink: 0;
+    }
+    .stat-icon.blue { background: linear-gradient(135deg, #6366f1, #06b6d4); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+    .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .queue-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .queue-table th,
+    .queue-table td {
+        padding: 12px 14px;
+        text-align: right;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .queue-table th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 12px;
+    }
+    .badge {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-confirmed { background: #d1fae5; color: #065f46; }
+    .badge-checked-in { background: #dbeafe; color: #1e40af; }
+    .badge-in-progress { background: #e0e7ff; color: #3730a3; }
+    .badge-completed { background: #d1fae5; color: #065f46; }
+    .badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+    }
+    .empty-state .icon { font-size: 48px; opacity: 0.4; margin-bottom: 8px; }
+
+    .btn-action {
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-action.start {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    .btn-action.complete {
+        background: #d1fae5;
+        color: #065f46;
+    }
+</style>
+
+<!-- اسکریپت -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const API_BASE = '/api';
+    const doctorId = /*[[${#authentication.principal.id}]]*/ 0;
+
+    async function loadDashboard() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/dashboard/doctor`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!res.ok) throw new Error('خطا در بارگذاری');
+
+            const data = await res.json();
+
+            // پر کردن آمار
+            document.getElementById('totalToday').textContent = data.stats?.total || 0;
+            document.getElementById('completedToday').textContent = data.stats?.completed || 0;
+            document.getElementById('pendingToday').textContent = data.stats?.pending || 0;
+            document.getElementById('queueCount').textContent = data.queue?.length || 0;
+
+            // پر کردن صف
+            renderQueue(data.queue || []);
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('queueContainer').innerHTML =
+                '<div class="empty-state"><div class="icon">⚠️</div><p>خطا در بارگذاری اطلاعات</p></div>';
+        }
+    }
+
+    function renderQueue(queue) {
+        const container = document.getElementById('queueContainer');
+
+        if (queue.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>نوبتی در صف امروز وجود ندارد</p>
+                </div>`;
+            return;
+        }
+
+        const rows = queue.map((apt, idx) => `
+            <tr>
+                <td>${apt.queueNumber || (idx + 1)}</td>
+                <td>${apt.patientName}</td>
+                <td>${apt.startTime}</td>
+                <td><span class="badge badge-${apt.status.toLowerCase().replace('_', '-')}">${apt.statusLabel}</span></td>
+                <td>
+                    ${apt.status === 'CONFIRMED' ?
+            `<button class="btn-action start" onclick="startVisit(${apt.id})">شروع</button>` : ''}
+                    ${apt.status === 'IN_PROGRESS' ?
+            `<button class="btn-action complete" onclick="completeVisit(${apt.id})">اتمام</button>` : ''}
+                </td>
+            </tr>
+        `).join('');
+
+        container.innerHTML = `
+            <table class="queue-table">
+                <thead>
+                    <tr>
+                        <th>صف</th>
+                        <th>بیمار</th>
+                        <th>ساعت</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    }
+
+    async function startVisit(id) {
+        await updateStatus(id, 'start');
+    }
+
+    async function completeVisit(id) {
+        await updateStatus(id, 'complete');
+    }
+
+    async function updateStatus(id, action) {
+        const token = localStorage.getItem('accessToken');
+        try {
+            const res = await fetch(`${API_BASE}/appointments/${id}/${action}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (res.ok) {
+                loadDashboard();
+            } else {
+                alert('خطا در تغییر وضعیت');
+            }
+        } catch (err) {
+            alert('خطا در ارتباط با سرور');
+        }
+    }
+
+    // اجرا
+    loadDashboard();
+    /*]]>*/
+</script>
+
+</body>
+</html>

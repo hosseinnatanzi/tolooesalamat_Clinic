@@ -1,7 +1,6 @@
 package ir.tolooesalamat.app.dto
 
-import ir.tolooesalamat.app.domain.Gender
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.*        // ← import جدید
 import jakarta.validation.constraints.*
 import java.time.LocalDateTime
 

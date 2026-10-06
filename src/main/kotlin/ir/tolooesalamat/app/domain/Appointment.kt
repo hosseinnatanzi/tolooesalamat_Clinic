@@ -1,25 +1,10 @@
 package ir.tolooesalamat.app.domain
 
-import jakarta.persistence.*
+import ir.tolooesalamat.app.domain.enum.*   // ← import جدید
+ import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-
-enum class AppointmentStatus(val label: String) {
-    PENDING("در انتظار تأیید"),
-    CONFIRMED("تأیید شده"),
-    CHECKED_IN("پذیرش شده"),
-    IN_PROGRESS("در حال ویزیت"),
-    COMPLETED("انجام شده"),
-    CANCELLED("لغو شده"),
-    NO_SHOW("عدم مراجعه")
-}
-
-enum class SessionType(val label: String) {
-    INITIAL("اولیه"),
-    FOLLOW_UP("پیگیری"),
-    EMERGENCY("اورژانسی")
-}
 
 @Entity
 @Table(
@@ -35,6 +20,7 @@ enum class SessionType(val label: String) {
     ]
 )
 class Appointment(
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "doctor_id", nullable = false,
         foreignKey = ForeignKey(name = "fk_appointment_doctor"))
@@ -77,6 +63,7 @@ class Appointment(
 
     @Column(name = "completed_at")
     var completedAt: LocalDateTime? = null
+
 ) : BaseEntity() {
 
     @get:Transient

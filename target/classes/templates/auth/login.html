@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود | کلینیک روان‌پزشکی</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .logo {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 16px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        h1 { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+        .subtitle { color: #64748b; font-size: 14px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+        .message.error { background: #fee2e2; color: #991b1b; display: block; }
+        .message.success { background: #d1fae5; color: #065f46; display: block; }
+        .register-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .register-link a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .demo-box {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .demo-box p { color: #64748b; margin-bottom: 8px; text-align: center; }
+        .demo-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        .demo-item span:first-child { color: #64748b; }
+        .demo-item span:last-child {
+            color: #4f46e5;
+            font-weight: 600;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <div class="header">
+        <div class="logo">🧠</div>
+        <h1>ورود به سیستم</h1>
+        <p class="subtitle">با شماره موبایل و رمز عبور وارد شوید</p>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <form id="loginForm" onsubmit="return handleLogin(event)">
+        <div class="form-group">
+            <label for="phone">شماره موبایل</label>
+            <input type="tel" id="phone" name="phone"
+                   placeholder="09123456789"
+                   pattern="09[0-9]{9}"
+                   maxlength="11" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="password">رمز عبور</label>
+            <input type="password" id="password" name="password"
+                   placeholder="رمز عبور خود را وارد کنید" required>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">ورود</button>
+    </form>
+
+    <div class="register-link">
+        حساب کاربری ندارید؟
+        <a href="/">ثبت‌نام کنید</a>
+    </div>
+
+    <!-- اطلاعات دمو -->
+    <div class="demo-box">
+        <p>🔑 حساب‌های دمو (رمز همه: demo1234)</p>
+        <div class="demo-item">
+            <span>👑 مدیر</span>
+            <span>09121111111</span>
+        </div>
+        <div class="demo-item">
+            <span>👨‍⚕️ پزشک</span>
+            <span>09122222222</span>
+        </div>
+        <div class="demo-item">
+            <span>📞 منشی</span>
+            <span>09123333333</span>
+        </div>
+        <div class="demo-item">
+            <span>🧑 بیمار</span>
+            <span>09124444444</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // نمایش پیام از query string
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'true') {
+        showMessage('شماره موبایل یا رمز عبور اشتباه است', 'error');
+    }
+    if (urlParams.get('logout') === 'true') {
+        showMessage('با موفقیت خارج شدید', 'success');
+    }
+
+    async function handleLogin(event) {
+        event.preventDefault();
+        const form = event.target;
+        const btn = document.getElementById('submitBtn');
+
+        const data = {
+            phone: form.phone.value.trim(),
+            password: form.password.value
+        };
+
+        if (!/^09[0-9]{9}$/.test(data.phone)) {
+            showMessage('شماره موبایل نامعتبر است', 'error');
+            return false;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'در حال ورود...';
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('accessToken', result.accessToken);
+                localStorage.setItem('refreshToken', result.refreshToken);
+                localStorage.setItem('user', JSON.stringify(result.user));
+
+                showMessage('✅ ورود موفق! در حال انتقال...', 'success');
+                setTimeout(() => window.location.href = '/dashboard', 800);
+            } else {
+                const msg = result.message
+                    || (result.validationErrors
+                        ? Object.values(result.validationErrors).join(' - ')
+                        : 'شماره موبایل یا رمز عبور اشتباه است');
+                showMessage(msg, 'error');
+            }
+        } catch (err) {
+            showMessage('خطا در ارتباط با سرور', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'ورود';
+        }
+        return false;
+    }
+
+    function showMessage(text, type) {
+        const el = document.getElementById('message');
+        el.textContent = text;
+        el.className = 'message ' + type;
+        el.style.display = 'block';
+    }
+</script>
+</body>
+</html>

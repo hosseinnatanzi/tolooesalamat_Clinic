@@ -1,6 +1,6 @@
 package ir.tolooesalamat.app.security
 
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.domain.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority

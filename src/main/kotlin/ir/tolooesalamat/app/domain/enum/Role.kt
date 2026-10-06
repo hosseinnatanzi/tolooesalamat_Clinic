@@ -1,4 +1,4 @@
-package ir.tolooesalamat.app.domain
+package ir.tolooesalamat.app.domain.enum
 
 /**
  * نقش کاربری در سیستم.

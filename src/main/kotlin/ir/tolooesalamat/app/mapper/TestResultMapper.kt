@@ -14,7 +14,6 @@ class TestResultMapper {
         testId = result.test.id,
         doctorId = result.doctor.id,
         testDate = result.testDate,
-        // 🔓 رمزگشایی خودکار از طریق Converter
         rawScore = result.rawScore,
         interpretation = result.interpretation,
         diagnosis = result.diagnosis,
@@ -39,23 +38,5 @@ class TestResultMapper {
         doctorName = result.doctor.fullName,
         confidentialityLevel = result.confidentialityLevel,
         isFinalized = result.isFinalized
-    )
-
-    fun toEntity(
-        dto: TestResultDto,
-        patient: ir.tolooesalamat.app.domain.User,
-        doctor: ir.tolooesalamat.app.domain.User,
-        test: ir.tolooesalamat.app.domain.PsychologicalTest
-    ): TestResult = TestResult(
-        patient = patient,
-        doctor = doctor,
-        test = test,
-        testDate = dto.testDate ?: java.time.LocalDateTime.now(),
-        rawScore = dto.rawScore,
-        interpretation = dto.interpretation,
-        diagnosis = dto.diagnosis,
-        rawData = dto.rawData,
-        recommendations = dto.recommendations,
-        confidentialityLevel = dto.confidentialityLevel
     )
 }

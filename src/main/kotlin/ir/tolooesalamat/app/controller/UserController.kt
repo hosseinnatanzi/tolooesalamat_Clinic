@@ -1,9 +1,8 @@
 package ir.tolooesalamat.app.controller
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.dto.*
 import ir.tolooesalamat.app.security.CustomUserDetails
 import ir.tolooesalamat.app.service.UserService

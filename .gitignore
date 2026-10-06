@@ -1,20 +1,37 @@
+# Dependencies
+node_modules/
+
+# Maven / Build output
 target/
 build/
-*.class
-*.jar
-.idea/
-*.iml
-.vscode/
-src/main/resources/keys/*.pem
-*.pem
-*.key
-src/main/resources/.env
+dist/
+
+# Environment
+.env
 .env.*
 !.env.example
-logs/
+src/main/resources/.env
+
+# Logs
 *.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# JavaScript cache
+.npm/
+.eslintcache/
+.cache/
+
+# OS
 .DS_Store
-# Encryption keys
-src/main/resources/keys/*.xml
-src/main/resources/keys/*.pem
-src/main/resources/keys/*.key
+Thumbs.db
+
+# Secrets / keys
+*.pem
+*.key
+*.p12
+*.jks

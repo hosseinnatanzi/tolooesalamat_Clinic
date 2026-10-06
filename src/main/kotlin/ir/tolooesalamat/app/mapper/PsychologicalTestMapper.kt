@@ -15,10 +15,8 @@ class PsychologicalTestMapper {
         description = test.description,
         totalQuestions = test.totalQuestions,
         estimatedMinutes = test.estimatedMinutes,
-        category = test.category,
-        active = test.active,
-        createdAt = test.createdAt,
-        updatedAt = test.updatedAt
+        category = test.category,        // ← مستقیم، بدون تبدیل
+        active = test.active
     )
 
     fun toSummary(test: PsychologicalTest): PsychologicalTestSummaryDto =
@@ -26,7 +24,7 @@ class PsychologicalTestMapper {
             id = test.id ?: 0L,
             name = test.name,
             code = test.code,
-            category = test.category?.name
+            category = test.category?.name    // ← enum → String
         )
 
     fun toEntity(dto: PsychologicalTestDto): PsychologicalTest = PsychologicalTest(
@@ -35,7 +33,7 @@ class PsychologicalTestMapper {
         description = dto.description,
         totalQuestions = dto.totalQuestions,
         estimatedMinutes = dto.estimatedMinutes,
-        category = dto.category,
+        category = dto.category,        // ← مستقیم
         active = dto.active
     )
 

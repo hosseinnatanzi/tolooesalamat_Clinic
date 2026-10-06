@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- پیام‌ها -->
+<th:block th:fragment="messages">
+    <!-- پیام سرور -->
+    <div th:if="${success}" class="message message-success">
+        <span>✅</span>
+        <span th:text="${success}">عملیات با موفقیت انجام شد</span>
+    </div>
+
+    <div th:if="${error}" class="message message-error">
+        <span>❌</span>
+        <span th:text="${error}">خطا در انجام عملیات</span>
+    </div>
+
+    <div th:if="${warning}" class="message message-warning">
+        <span>⚠️</span>
+        <span th:text="${warning}">هشدار</span>
+    </div>
+
+    <div th:if="${info}" class="message message-info">
+        <span>ℹ️</span>
+        <span th:text="${info}">اطلاعات</span>
+    </div>
+
+    <!-- پیام‌های فلش (پس از redirect) -->
+    <th:block th:if="${flash}">
+        <div th:each="entry : ${flash}" class="message message-info">
+            <span th:text="${entry.value}"></span>
+        </div>
+    </th:block>
+</th:block>
+
+</body>
+</html>

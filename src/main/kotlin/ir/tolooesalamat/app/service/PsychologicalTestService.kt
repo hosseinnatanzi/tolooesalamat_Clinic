@@ -1,10 +1,9 @@
 package ir.tolooesalamat.app.service
 
 import ir.tolooesalamat.app.crypto.core.DigitalSignatureService
-import ir.tolooesalamat.app.domain.PsychologicalTest
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.domain.TestResult
-import ir.tolooesalamat.app.domain.Userz
+import ir.tolooesalamat.app.domain.User
 import ir.tolooesalamat.app.dto.*
 import ir.tolooesalamat.app.exception.AccessDeniedException
 import ir.tolooesalamat.app.exception.BusinessException
@@ -22,7 +21,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 @Service
 @Transactional(readOnly = true)

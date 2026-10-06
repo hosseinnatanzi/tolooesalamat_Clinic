@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت‌نام | کلینیک روان‌پزشکی</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 16px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        .gender-group {
+            display: flex;
+            gap: 12px;
+        }
+        .gender-option {
+            flex: 1;
+            position: relative;
+        }
+        .gender-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .gender-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8fafc;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+        }
+        .gender-option input[type="radio"]:checked + label {
+            border-color: #6366f1;
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .login-link a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .register-card { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="register-card">
+    <div class="header">
+        <div class="logo">🧠</div>
+        <h1>ثبت‌نام بیمار</h1>
+        <p class="subtitle">برای رزرو نوبت، لطفاً ثبت‌نام کنید</p>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <form id="registerForm" onsubmit="return handleRegister(event)">
+        <!-- نام و نام خانوادگی -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="firstName">نام *</label>
+                <input type="text" id="firstName" name="firstName"
+                       placeholder="مثلاً: حسن" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="lastName">نام خانوادگی *</label>
+                <input type="text" id="lastName" name="lastName"
+                       placeholder="مثلاً: محمدی" required>
+            </div>
+        </div>
+
+        <!-- سن و جنسیت -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="age">سن *</label>
+                <input type="number" id="age" name="age"
+                       min="1" max="120" placeholder="مثلاً: ۳۵" required>
+            </div>
+            <div class="form-group">
+                <label>جنسیت *</label>
+                <div class="gender-group">
+                    <div class="gender-option">
+                        <input type="radio" id="male" name="gender" value="MALE" required>
+                        <label for="male">👨 مرد</label>
+                    </div>
+                    <div class="gender-option">
+                        <input type="radio" id="female" name="gender" value="FEMALE" required>
+                        <label for="female">👩 زن</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- شماره موبایل -->
+        <div class="form-group">
+            <label for="phone">شماره موبایل *</label>
+            <input type="tel" id="phone" name="phone"
+                   placeholder="09123456789"
+                   pattern="09[0-9]{9}"
+                   maxlength="11"
+                   required>
+            <div class="hint">این شماره، شناسه ورود شما خواهد بود</div>
+        </div>
+
+        <!-- تلفن ثابت (اختیاری) -->
+        <div class="form-group">
+            <label for="landline">تلفن ثابت (اختیاری)</label>
+            <input type="tel" id="landline" name="landline"
+                   placeholder="02112345678" maxlength="15">
+        </div>
+
+        <!-- رمز عبور -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="password">رمز عبور *</label>
+                <input type="password" id="password" name="password"
+                       minlength="8"
+                       placeholder="حداقل ۸ کاراکتر" required>
+                <div class="hint">حداقل ۸ کاراکتر، شامل حرف و عدد</div>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">تکرار رمز عبور *</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       minlength="8"
+                       placeholder="تکرار رمز عبور" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+            ثبت‌نام و ورود
+        </button>
+    </form>
+
+    <div class="login-link">
+        قبلاً ثبت‌نام کرده‌اید؟
+        <a href="/login">ورود به سیستم</a>
+    </div>
+</div>
+
+<script>
+    async function handleRegister(event) {
+        event.preventDefault();
+        const form = event.target;
+        const btn = document.getElementById('submitBtn');
+        const messageEl = document.getElementById('message');
+
+        messageEl.className = 'message';
+        messageEl.textContent = '';
+
+        const data = {
+            firstName: form.firstName.value.trim(),
+            lastName: form.lastName.value.trim(),
+            age: parseInt(form.age.value),
+            gender: form.gender.value,
+            phone: form.phone.value.trim(),
+            landline: form.landline.value.trim() || null,
+            password: form.password.value,
+            confirmPassword: form.confirmPassword.value
+        };
+
+        // اعتبارسنجی
+        if (!data.gender) {
+            showMessage('لطفاً جنسیت را انتخاب کنید', 'error');
+            return false;
+        }
+        if (!/^09[0-9]{9}$/.test(data.phone)) {
+            showMessage('شماره موبایل باید با ۰۹ شروع شده و ۱۱ رقم باشد', 'error');
+            return false;
+        }
+        if (data.password !== data.confirmPassword) {
+            showMessage('رمز عبور و تکرار آن مطابقت ندارند', 'error');
+            return false;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'در حال ثبت‌نام...';
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('accessToken', result.accessToken);
+                localStorage.setItem('refreshToken', result.refreshToken);
+                localStorage.setItem('user', JSON.stringify(result.user));
+
+                showMessage('✅ ثبت‌نام موفق! در حال انتقال...', 'success');
+                setTimeout(() => window.location.href = '/dashboard', 1000);
+            } else {
+                const errorMsg = result.message
+                    || (result.validationErrors
+                        ? Object.values(result.validationErrors).join(' - ')
+                        : 'خطا در ثبت‌نام');
+                showMessage(errorMsg, 'error');
+            }
+        } catch (err) {
+            showMessage('خطا در ارتباط با سرور', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'ثبت‌نام و ورود';
+        }
+        return false;
+    }
+
+    function showMessage(text, type) {
+        const el = document.getElementById('message');
+        el.textContent = text;
+        el.className = 'message ' + type;
+    }
+</script>
+</body>
+</html>

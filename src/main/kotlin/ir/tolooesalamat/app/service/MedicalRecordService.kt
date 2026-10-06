@@ -2,7 +2,7 @@ package ir.tolooesalamat.app.service
 
 import ir.tolooesalamat.app.crypto.core.DigitalSignatureService
 import ir.tolooesalamat.app.domain.MedicalRecord
-import ir.tolooesalamat.app.domain.Role
+import ir.tolooesalamat.app.domain.enum.Role
 import ir.tolooesalamat.app.domain.User
 import ir.tolooesalamat.app.dto.*
 import ir.tolooesalamat.app.exception.AccessDeniedException

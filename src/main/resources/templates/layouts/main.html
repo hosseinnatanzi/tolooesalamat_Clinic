@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'کلینیک روان‌پزشکی'">کلینیک روان‌پزشکی</title>
+
+    <!-- فونت وزیرمتن -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- استایل پایه -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+
+    <th:block th:replace="~{fragments/header :: headerStyles}"></th:block>
+    <th:block th:replace="~{fragments/footer :: footerStyles}"></th:block>
+</head>
+<body>
+<!-- هدر -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<!-- محتوای اصلی -->
+<main class="main-container">
+    <!-- پیام‌ها -->
+    <div th:replace="~{fragments/messages :: messages}"></div>
+
+    <!-- محتوای هر صفحه -->
+    <th:block th:replace="${content}"></th:block>
+</main>
+
+<!-- فوتر -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:src="@{/js/main.js}"></script>
+<th:block th:replace="~{fragments/header :: headerScripts}"></th:block>
+</body>
+</html>

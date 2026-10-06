@@ -1,7 +1,7 @@
 package ir.tolooesalamat.app.mapper
 
-import ir.tolooesalamat.app.domain.Gender
 import ir.tolooesalamat.app.domain.User
+import ir.tolooesalamat.app.domain.enum.Gender        // ← import جدید
 import ir.tolooesalamat.app.dto.UserDto
 import ir.tolooesalamat.app.dto.UserSummaryDto
 import org.springframework.stereotype.Component
@@ -43,7 +43,7 @@ class UserMapper {
         roleLabel = user.role.label
     )
 
-    fun toEntity(dto: UserDto, encodedPassword: String?): User = User(
+    fun toEntity(dto: UserDto, encodedPassword: String): User = User(
         phone = dto.phone,
         landline = dto.landline,
         password = encodedPassword,

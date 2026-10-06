@@ -1,10 +1,19 @@
 package ir.tolooesalamat.app.domain
 
+import ir.tolooesalamat.app.domain.enum.TestCategory   // ← import جدید
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "psychological_tests")
+@Table(
+    name = "psychological_tests",
+    indexes = [
+        Index(name = "idx_test_name", columnList = "name", unique = true),
+        Index(name = "idx_test_code", columnList = "code", unique = true),
+        Index(name = "idx_test_active", columnList = "active")
+    ]
+)
 class PsychologicalTest(
+
     @Column(name = "name", nullable = false, unique = true, length = 100)
     var name: String = "",
 
@@ -20,6 +29,15 @@ class PsychologicalTest(
     @Column(name = "estimated_minutes")
     var estimatedMinutes: Int = 0,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 30)
+    var category: TestCategory? = null,
+
     @Column(name = "active", nullable = false)
     var active: Boolean = true
-) : BaseEntity()
+
+) : BaseEntity() {
+
+    override fun toString(): String =
+        "PsychologicalTest(id=$id, name='$name', code='$code')"
+}

@@ -1,7 +1,8 @@
 package ir.tolooesalamat.app.domain
 
 import ir.tolooesalamat.app.crypto.converter.EncryptedStringConverter
-import jakarta.persistence.*
+import ir.tolooesalamat.app.domain.enum.Gender
+ import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
@@ -14,6 +15,7 @@ import java.time.LocalDate
     ]
 )
 class PatientProfile(
+
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, unique = true,
         foreignKey = ForeignKey(name = "fk_patient_profile_user"))
@@ -72,4 +74,12 @@ class PatientProfile(
 
     @Column(name = "file_status", nullable = false, length = 20)
     var fileStatus: String = "ACTIVE"
-) : BaseEntity()
+
+) : BaseEntity() {
+
+    @get:Transient
+    val isActive: Boolean get() = fileStatus == "ACTIVE"
+
+    override fun toString(): String =
+        "PatientProfile(id=$id, fileNumber='$fileNumber')"
+}

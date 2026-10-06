@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════
+   🎨 استایل پایه
+   ═══════════════════════════════════════════════ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    direction: rtl;
+    min-height: 100vh;
+    line-height: 1.7;
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 24px 60px;
+    min-height: calc(100vh - 200px);
+}
+
+/* پیام‌ها */
+.message {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+}
+
+.message-success {
+    background: #d1fae5;
+    color: #065f46;
+    border-right: 4px solid #10b981;
+}
+
+.message-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border-right: 4px solid #ef4444;
+}
+
+.message-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-right: 4px solid #f59e0b;
+}
+
+.message-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-right: 4px solid #6366f1;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 20px 16px 40px;
+    }
+}

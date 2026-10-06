@@ -44,11 +44,7 @@ class AppointmentMapper {
         queueNumber = appointment.queueNumber
     )
 
-    fun toEntity(
-        dto: AppointmentDto,
-        doctor: User,
-        patient: User
-    ): Appointment = Appointment(
+    fun toEntity(dto: AppointmentDto, doctor: User, patient: User): Appointment = Appointment(
         doctor = doctor,
         patient = patient,
         date = dto.date!!,
