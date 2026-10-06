@@ -8,7 +8,7 @@ build/
 src/main/resources/keys/*.pem
 *.pem
 *.key
-.env
+src/main/resources/.env
 .env.*
 !.env.example
 logs/

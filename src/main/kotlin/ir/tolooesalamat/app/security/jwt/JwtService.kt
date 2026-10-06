@@ -1,22 +1,17 @@
 package ir.tolooesalamat.app.security.jwt
 
- import ir.tolooesalamat.app.domain.User
+import ir.tolooesalamat.app.domain.User
+import ir.tolooesalamat.app.crypto.core.RsaKeyManager
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
- import ir.tolooesalamat.app.crypto.core.RsaKeyManager
- import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.UUID
 
-/**
- * سرویس JWT با الگوریتم RS256.
- *  - امضا: RSA Private Key
- *  - تأیید: RSA Public Key
- */
 @Service
 class JwtService(
     private val jwtProperties: JwtProperties,
@@ -39,9 +34,6 @@ class JwtService(
     // 🎯 تولید توکن
     // ═══════════════════════════════════════════
 
-    /**
-     * تولید Access Token (عمر کوتاه).
-     */
     fun generateAccessToken(user: User): String {
         val now = Instant.now()
         val expiresAt = now.plus(jwtProperties.expirationHours, ChronoUnit.HOURS)
@@ -62,9 +54,6 @@ class JwtService(
             .compact()
     }
 
-    /**
-     * تولید Refresh Token (عمر طولانی‌تر).
-     */
     fun generateRefreshToken(user: User): String {
         val now = Instant.now()
         val expiresAt = now.plus(jwtProperties.refreshExpirationDays, ChronoUnit.DAYS)
@@ -86,13 +75,10 @@ class JwtService(
     // 🔍 اعتبارسنجی
     // ═══════════════════════════════════════════
 
-    /**
-     * تأیید امضا و استخراج Claims.
-     */
     fun validateAndParse(token: String): Claims? = try {
         Jwts.parser()
             .verifyWith(rsaKeyManager.getPublicKey())
-            .requireIssuer(jwtProperties.issuer)
+            .requireIssuer(jwtProperties.issuer)          // still valid in 0.12.x
             .clockSkewSeconds(jwtProperties.clockSkewSeconds)
             .build()
             .parseSignedClaims(token)
@@ -129,8 +115,5 @@ class JwtService(
     fun isTokenExpired(token: String): Boolean =
         validateAndParse(token)?.expiration?.before(Date()) ?: true
 
-    /**
-     * زمان انقضای توکن به ثانیه.
-     */
     fun getExpirationSeconds(): Long = jwtProperties.expirationHours * 3600
 }

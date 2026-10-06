@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
-import org.springframework.lang.NonNull
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
@@ -14,7 +13,12 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 /**
  * فیلتر JWT — در هر درخواست اجرا می‌شود.
- * توکن را از Header استخراج و اعتبارسنجی می‌کند.
+ *
+ * این فیلتر:
+ *  1. توکن را از Header استخراج می‌کند
+ *  2. امضای توکن را با Public Key تأیید می‌کند
+ *  3. کاربر را از DB بارگذاری می‌کند
+ *  4. SecurityContext را پر می‌کند
  */
 @Component
 class JwtAuthenticationFilter(
@@ -26,9 +30,9 @@ class JwtAuthenticationFilter(
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun doFilterInternal(
-        @NonNull request: HttpServletRequest,
-        @NonNull response: HttpServletResponse,
-        @NonNull filterChain: FilterChain
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
     ) {
         val token = extractToken(request)
 

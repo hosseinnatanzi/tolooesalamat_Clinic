@@ -32,19 +32,23 @@ class SecurityConfig(
 ) {
 
     /**
-     * BCrypt برای هش رمز عبور (cost=12).
+     * Bcrypt برای هش رمز عبور (cost=12).
      */
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder(12)
 
     /**
-     * Provider احراز هویت با دیتابیس.
+     * Provider احراز هویت.
+     *
+     * ⚠️ در Spring Security 7:
+     *  - Constructor الزاماً userDetailsService می‌گیرد
+     *  - setUserDetailsService حذف شده
+     *  - setPasswordEncoder هنوز هست (ولی اختیاری)
      */
     @Bean
     fun authenticationProvider(): DaoAuthenticationProvider {
-        val provider = DaoAuthenticationProvider()
-        provider.setUserDetailsService(userDetailsService)
-        provider.setPasswordEncoder(passwordEncoder())
+        val provider = DaoAuthenticationProvider(userDetailsService)  // ← Constructor
+        provider.setPasswordEncoder(passwordEncoder())                // ← هنوز کار می‌کند
         return provider
     }
 
@@ -75,10 +79,10 @@ class SecurityConfig(
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .csrf { it.disable() }                                // JWT → بدون CSRF
+            .csrf { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
             .sessionManagement {
-                it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Stateless
+                it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
             .exceptionHandling {
                 it.authenticationEntryPoint(jwtAuthenticationEntryPoint)
