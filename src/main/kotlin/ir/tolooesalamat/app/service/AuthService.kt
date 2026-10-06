@@ -54,7 +54,7 @@ class AuthService(
         }
 
         val autoUsername = generateUsername(request.phone, Role.PATIENT)
-        val hashedPassword = passwordEncoder.encode(request.password)
+        val hashedPassword = passwordEncoder.encode(request.password)?: throw BusinessException("خطا در رمزنگاری رمز عبور")
 
         val user = User(
             phone = request.phone,
