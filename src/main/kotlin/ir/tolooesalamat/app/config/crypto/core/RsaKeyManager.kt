@@ -1,6 +1,7 @@
 package ir.tolooesalamat.app.crypto.core
 
 import jakarta.annotation.PostConstruct
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.stereotype.Component
@@ -15,6 +16,7 @@ import javax.crypto.Cipher
 import javax.crypto.EncryptedPrivateKeyInfo
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
+
 @Component
 class RsaKeyManager(
     @Value("\${app.crypto.public-key-path}") private val publicKeyPath: String,
@@ -68,7 +70,7 @@ class RsaKeyManager(
         }.verify(signatureBytes)
 
     // ═══════════════════════════════════════════
-    // 🔑 بارگذاری کلیدها
+    // 🔑 بارگذاری Public Key
     // ═══════════════════════════════════════════
 
     private fun loadPublicKey(path: String): PublicKey {
@@ -78,15 +80,19 @@ class RsaKeyManager(
         return KeyFactory.getInstance("RSA").generatePublic(keySpec)
     }
 
+    // ═══════════════════════════════════════════
+    // 🔑 بارگذاری Private Key — با Fallback
+    // ═══════════════════════════════════════════
+
     /**
-     * بارگذاری Private Key — پشتیبانی از هر دو فرمت:
-     *  1. PKCS#8 Encrypted (با رمز)
-     *  2. PKCS#8 Plain (بدون رمز)
+     * پشتیبانی از دو فرمت:
+     *  1. PKCS#8 Encrypted → `-----BEGIN ENCRYPTED PRIVATE KEY-----`
+     *  2. PKCS#8 Plain → `-----BEGIN PRIVATE KEY-----`
      */
     private fun loadPrivateKey(path: String, password: String): PrivateKey {
         val pemContent = readPem(path)
 
-        // تلاش ۱: رمزنگاری‌شده
+        // تلاش ۱: فرمت رمزنگاری‌شده (اگر رمز داده شده)
         if (password.isNotBlank()) {
             try {
                 log.debug("🔐 تلاش برای بارگذاری Private Key رمزنگاری‌شده...")
@@ -97,10 +103,21 @@ class RsaKeyManager(
             }
         }
 
-        // تلاش ۲: بدون رمز (PKCS#8 Plain)
-        return loadPlainPrivateKey(pemContent)
+        // تلاش ۲: فرمت بدون رمز (PKCS#8 Plain)
+        try {
+            return loadPlainPrivateKey(pemContent)
+        } catch (e: Exception) {
+            throw IllegalStateException(
+                "❌ خطا در بارگذاری Private Key. " +
+                        "اطمینان حاصل کن فایل با فرمت PKCS#8 است. " +
+                        "خطا: ${e.message}", e
+            )
+        }
     }
 
+    /**
+     * بارگذاری PKCS#8 Encrypted.
+     */
     private fun loadEncryptedPrivateKey(pemContent: String, password: String): PrivateKey {
         val encryptedBytes = Base64.getDecoder().decode(pemContent)
         val encryptedPrivateKeyInfo = EncryptedPrivateKeyInfo(encryptedBytes)
@@ -113,11 +130,18 @@ class RsaKeyManager(
         return KeyFactory.getInstance("RSA").generatePrivate(decryptedKeySpec)
     }
 
+    /**
+     * بارگذاری PKCS#8 Plain (بدون رمز).
+     */
     private fun loadPlainPrivateKey(pemContent: String): PrivateKey {
         val keyBytes = Base64.getDecoder().decode(pemContent)
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec)
     }
+
+    // ═══════════════════════════════════════════
+    // 📄 خواندن PEM
+    // ═══════════════════════════════════════════
 
     private fun readPem(path: String): String {
         val resource = DefaultResourceLoader().getResource(path)
